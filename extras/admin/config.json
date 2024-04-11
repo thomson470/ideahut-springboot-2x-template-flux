@@ -4,7 +4,7 @@
 	},
 	"resource": {
 		"requestPath": "/_",
-		"locations": "file:/opt/macdev/project/thomson470/github/ideahut-quasar-admin/dist/spa/",
+		"locations": "file:{user.dir}/extras/admin/resource/",
 		"indexFile": "index.html",
 		"alwaysToIndex": true,
 		"allowedPaths": ["css", "fonts", "icons", "img", "js"]
