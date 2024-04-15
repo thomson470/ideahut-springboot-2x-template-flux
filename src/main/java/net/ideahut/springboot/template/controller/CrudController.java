@@ -65,7 +65,6 @@ class CrudController extends net.ideahut.springboot.crud.ReactiveCrudController 
 		@PathVariable("action") String action,
 		ServerHttpRequest request
 	) throws Exception {
-		
 		return DataBufferUtils
 		.join(request.getBody())
 		.flatMap(dataBuffer -> {

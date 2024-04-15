@@ -67,8 +67,6 @@
         <maven.compiler.source>11</maven.compiler.source>
         <java.version>11</java.version>
         
-        <version.ideahut-springboot>0.0.4</version.ideahut-springboot>
-        
         <version.commons-io>2.15.1</version.commons-io>
         <version.commons-httpclient>3.1</version.commons-httpclient>
         <version.commons-fileupload>1.5</version.commons-fileupload>
@@ -86,7 +84,12 @@
 		<!-- IDEAHUT -->
 		<dependency>
 			<groupId>net.ideahut</groupId>
-			<version>${version.ideahut-springboot}</version>
+			<artifactId>ideahut-springboot-2x</artifactId>
+			<version>1.0.0</version>
+		</dependency>
+		<dependency>
+			<groupId>net.ideahut</groupId>
+			<version>1.0.0</version>
             <!--<artifactId>ideahut-springboot-2.1.4</artifactId>-->
             <!--<artifactId>ideahut-springboot-2.3.12</artifactId>-->
             <!--<artifactId>ideahut-springboot-2.6.15</artifactId>-->

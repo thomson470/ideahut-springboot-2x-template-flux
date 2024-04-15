@@ -15,6 +15,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import lombok.Getter;
 import lombok.Setter;
+import net.ideahut.springboot.annotation.Reactive;
 import net.ideahut.springboot.mail.MailHandler;
 import net.ideahut.springboot.mail.MailObject;
 import net.ideahut.springboot.mail.MailObject.Attachment;
@@ -43,12 +44,14 @@ class MailController {
 		private MultipartFile attachment;
 	}
 	
+	@Reactive(response = false)
 	@PostMapping("/send/sync")
 	protected Result sendSync(@ModelAttribute Form form) throws Exception {
 		sendMail(form, false);
 		return Result.success();
 	}
 	
+	@Reactive(response = false)
 	@PostMapping("/send/async")
 	protected Result sendAsync(@ModelAttribute Form form) throws Exception {
 		sendMail(form, true);
