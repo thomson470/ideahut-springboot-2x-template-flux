@@ -7,6 +7,7 @@ import java.util.UUID;
 
 import javax.validation.Valid;
 
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -14,7 +15,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import net.ideahut.springboot.annotation.Public;
 import net.ideahut.springboot.init.InitRequest;
-import net.ideahut.springboot.object.Result;
 
 @Public
 @RestController
@@ -25,7 +25,7 @@ import net.ideahut.springboot.object.Result;
 class WarmUpController {
 
     @PostMapping
-    protected Result post(@RequestBody @Valid InitRequest initRequest) {
-    	return Result.success(initRequest).setInfo("uuid", UUID.randomUUID().toString());
+    protected ResponseEntity<String> post(@RequestBody @Valid InitRequest initRequest) {
+        return ResponseEntity.ok(UUID.randomUUID().toString() + initRequest);
     }
 }

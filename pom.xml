@@ -75,6 +75,7 @@
         <version.apache-poi>5.2.5</version.apache-poi>
         <version.mysql-connector-java>8.0.33</version.mysql-connector-java>
         <version.jbcrypt>0.4</version.jbcrypt>
+        <version.jjwt>0.12.5</version.jjwt>
         
 	</properties>
 
@@ -85,11 +86,11 @@
 		<dependency>
 			<groupId>net.ideahut</groupId>
 			<artifactId>ideahut-springboot-2x</artifactId>
-			<version>1.0.0</version>
+			<version>2.0.0</version>
 		</dependency>
 		<dependency>
 			<groupId>net.ideahut</groupId>
-			<version>1.0.0</version>
+			<version>2.0.1</version>
             <!--<artifactId>ideahut-springboot-2.1.4</artifactId>-->
             <!--<artifactId>ideahut-springboot-2.3.12</artifactId>-->
             <!--<artifactId>ideahut-springboot-2.6.15</artifactId>-->
@@ -225,6 +226,31 @@
 		    <groupId>org.mindrot</groupId>
 		    <artifactId>jbcrypt</artifactId>
 		    <version>${version.jbcrypt}</version>
+		</dependency>
+		
+		
+		<!-- OKHTTP -->
+		<dependency>
+			<groupId>com.squareup.okhttp3</groupId>
+			<artifactId>okhttp</artifactId>
+		</dependency>
+		
+		
+		<!-- JJWT -->
+		<dependency>
+		    <groupId>io.jsonwebtoken</groupId>
+		    <artifactId>jjwt-api</artifactId>
+		    <version>${version.jjwt}</version>
+		</dependency>
+		<dependency>
+		    <groupId>io.jsonwebtoken</groupId>
+		    <artifactId>jjwt-impl</artifactId>
+		    <version>${version.jjwt}</version>
+		</dependency>
+		<dependency>
+		    <groupId>io.jsonwebtoken</groupId>
+		    <artifactId>jjwt-jackson</artifactId>
+		    <version>${version.jjwt}</version>
 		</dependency>
 
 

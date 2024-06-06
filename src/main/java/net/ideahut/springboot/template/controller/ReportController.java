@@ -22,7 +22,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import net.ideahut.springboot.annotation.Reactive;
+import net.ideahut.springboot.annotation.Body;
 import net.ideahut.springboot.report.ReportHandler;
 import net.ideahut.springboot.report.ReportInput;
 import net.ideahut.springboot.report.ReportType;
@@ -43,15 +43,21 @@ import reactor.core.publisher.Mono;
 @RequestMapping("/report")
 class ReportController implements InitializingBean {
 	
-	@Autowired
-	private AppProperties appProperties;
-	@Autowired
-	private ReportHandler reportHandler;
+	private final AppProperties appProperties;
+	private final ReportHandler reportHandler;
 	
 	private byte[] template;
 	private byte[] imageHeader;
 	private byte[] imageDetail;
 	
+	@Autowired
+	ReportController(
+		AppProperties appProperties,
+		ReportHandler reportHandler
+	) {
+		this.appProperties = appProperties;
+		this.reportHandler = reportHandler;
+	}
 	
 	@Override
 	public void afterPropertiesSet() throws Exception {
@@ -65,9 +71,9 @@ class ReportController implements InitializingBean {
 		imageDetail = IOUtils.toByteArray(resolver.getResource(path + "/tree2.png").getInputStream());
 	}
 	
-	@Reactive
+	@Body
 	@GetMapping
-	protected ResponseEntity<Mono<Resource>>  get(
+	protected ResponseEntity<Mono<Resource>> get(
 		@RequestParam("name") String name
 	) {
 		ReportType type = getType(name);
