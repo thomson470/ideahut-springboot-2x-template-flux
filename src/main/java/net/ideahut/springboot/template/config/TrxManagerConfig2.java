@@ -23,7 +23,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 import net.ideahut.springboot.entity.DatasourceProperties;
 import net.ideahut.springboot.entity.JpaProperties;
-import net.ideahut.springboot.template.AppConstants;
+import net.ideahut.springboot.template.Application;
 import net.ideahut.springboot.template.properties.AppProperties.Audit;
 import net.ideahut.springboot.template.properties.OtherProperties;
 import net.ideahut.springboot.util.FrameworkUtil;
@@ -78,8 +78,8 @@ class TrxManagerConfig2 {
 		bean.setPersistenceUnitPostProcessors(new PersistenceUnitPostProcessor() {
 			@Override
 			public void postProcessPersistenceUnitInfo(MutablePersistenceUnitInfo pui) {
-				pui.addManagedClassName(AppConstants.PACKAGE + ".entity.Information");
-				pui.addManagedClassName(AppConstants.PACKAGE + ".entity.CompositeHardDel");
+				pui.addManagedClassName(Application.Package.APPLICATION + ".entity.app.Information");
+				pui.addManagedClassName(Application.Package.APPLICATION + ".entity.app.CompositeHardDel");
 			}
 		});
 		return bean;

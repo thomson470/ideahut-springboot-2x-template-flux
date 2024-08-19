@@ -23,7 +23,7 @@ import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
-import net.ideahut.springboot.template.AppConstants;
+import net.ideahut.springboot.template.Application;
 import net.ideahut.springboot.template.properties.AppProperties;
 import net.ideahut.springboot.template.properties.AppProperties.Audit;
 import net.ideahut.springboot.util.FrameworkUtil;
@@ -38,7 +38,7 @@ import net.ideahut.springboot.util.FrameworkUtil;
 	entityManagerFactoryRef = "entityManagerFactory_1",
 	transactionManagerRef = "transactionManager_1",
 	basePackages = {
-		AppConstants.PACKAGE + ".repo"
+		Application.Package.APPLICATION + ".repo"
 	}
 )
 class TrxManagerConfig1 {
@@ -75,15 +75,14 @@ class TrxManagerConfig1 {
 		 * 
 		 * EntityIntegrator.setAuditSessionFactory("spring_sample", properties, auditSessionFactory);
 		 */
-		String entity = AppConstants.PACKAGE + ".entity";
 		return builder
 			.dataSource(dataSource)		
 			.persistenceUnit("default")
 			.packages(
-				entity + ".api",
-				entity + ".app",
-				entity + ".job",
-				entity + ".system"
+				Application.Package.LIBRARY + ".api.entity",
+				Application.Package.LIBRARY + ".job.entity",
+				Application.Package.LIBRARY + ".sysparam.entity",
+				Application.Package.APPLICATION + ".entity"
 			)
 			.properties(properties)			
 			.build();
