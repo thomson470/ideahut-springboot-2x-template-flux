@@ -11,7 +11,7 @@ management:
 
 spring:
    application:
-      name: ideahut-springboot-2x-template
+      name: ideahut-springboot-template
    quartz:
       auto-startup: false
    servlet:
@@ -210,7 +210,7 @@ other:
              
 logging:
    file:
-      name: "./logs/ideahut-springboot-2x-template.log"
+      name: "./logs/ideahut-springboot-template.log"
    pattern:
       console: '%d %p [%X{traceId}] %F\(%M:%L\) : %msg%n'
       file: '%d %p [%X{traceId}] %F\(%M:%L\) : %msg%n'
