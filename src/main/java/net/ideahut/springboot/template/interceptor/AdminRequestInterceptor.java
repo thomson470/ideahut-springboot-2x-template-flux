@@ -27,6 +27,7 @@ import net.ideahut.springboot.security.SecurityCredential;
 import net.ideahut.springboot.security.SecurityUser;
 import net.ideahut.springboot.security.WebFluxSecurityAuthorization;
 import net.ideahut.springboot.template.AppConstants;
+import net.ideahut.springboot.template.Application;
 import net.ideahut.springboot.util.WebFluxUtil;
 import reactor.core.publisher.Mono;
 
@@ -43,8 +44,10 @@ public class AdminRequestInterceptor implements WebFluxHandlerInterceptor, Initi
 	@Autowired
 	AdminRequestInterceptor(
 		AdminHandler adminHandler,
-		@Qualifier(AppConstants.Bean.Security.ADMIN) WebFluxSecurityAuthorization adminSecurity,
-		@Qualifier(AppConstants.Bean.Credential.ADMIN) SecurityCredential adminCredential
+		@Qualifier(AppConstants.Bean.Security.ADMIN) 
+		WebFluxSecurityAuthorization adminSecurity,
+		@Qualifier(AppConstants.Bean.Credential.ADMIN) 
+		SecurityCredential adminCredential
 	) {
 		this.adminHandler = adminHandler;
 		this.adminSecurity = adminSecurity;
@@ -73,6 +76,10 @@ public class AdminRequestInterceptor implements WebFluxHandlerInterceptor, Initi
 
 	@Override
 	public Mono<Void> preHandle(ServerWebExchange exchange, Object handler) {
+		if (!Application.isReady()) {
+			exchange.getResponse().setStatusCode(HttpStatus.SERVICE_UNAVAILABLE);
+			return null;
+		}
 		Mono<Void> mono = adminSecurity.isRequestAuthorized(exchange);
 		if (mono != null) {
 			return mono;
@@ -89,7 +96,7 @@ public class AdminRequestInterceptor implements WebFluxHandlerInterceptor, Initi
 				return Mono.empty();
 			}
 		} else if (handler instanceof HandlerMethod) {
-			String key = adminSecurity instanceof WebFluxAdminSecurity ? ((WebFluxAdminSecurity) adminSecurity).getHeaderKey() : HttpHeaders.AUTHORIZATION;
+			String key = adminSecurity instanceof WebFluxAdminSecurity ? ((WebFluxAdminSecurity) adminSecurity ).getHeaderKey() : HttpHeaders.AUTHORIZATION;
 			SecurityUser user = adminCredential.getSecurityUser(
 				new MapStringObject().setValue(
 					SecurityUser.Parameter.AUTHORIZATION, 

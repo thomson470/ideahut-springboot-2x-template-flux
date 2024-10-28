@@ -2,12 +2,10 @@ package net.ideahut.springboot.template.service;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.context.ApplicationContext;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.http.server.reactive.ServerHttpRequest;
@@ -16,6 +14,7 @@ import org.springframework.util.Assert;
 
 import net.ideahut.springboot.api.ApiAccess;
 import net.ideahut.springboot.api.ApiAuth;
+import net.ideahut.springboot.api.ApiHeader;
 import net.ideahut.springboot.api.ApiParameter;
 import net.ideahut.springboot.api.ApiProcessor;
 import net.ideahut.springboot.api.ApiRequest;
@@ -26,24 +25,24 @@ import net.ideahut.springboot.api.processor.AgentHostJwtApiProcessor;
 import net.ideahut.springboot.api.processor.AgentJwtApiProcessor;
 import net.ideahut.springboot.api.processor.HostJwtApiProcessor;
 import net.ideahut.springboot.api.processor.StandardJwtApiProcessor;
-import net.ideahut.springboot.bean.BeanConfigure;
 import net.ideahut.springboot.context.RequestContext;
 import net.ideahut.springboot.mapper.DataMapper;
+import net.ideahut.springboot.object.TimeValue;
 import net.ideahut.springboot.template.AppConstants;
 import net.ideahut.springboot.util.TimeUtil;
 import net.ideahut.springboot.util.WebFluxUtil;
 
 @Service
-class AccessServiceImpl implements AccessService, BeanConfigure<AccessService> {
+class AccessServiceImpl implements AccessService {
 	
 	//private static final Long TIME_SPAN = 120_000L; // 2 menit ke bawah dan ke atas
 	private static final Long API_ACCESS_EXPIRY = 86_400_000L; // 1 hari
-	private static final List<String> JWT_PROCESSORS = Arrays.asList(new String[] {
+	private static final List<String> JWT_PROCESSORS = Arrays.asList(
 		StandardJwtApiProcessor.API_TYPE,
 		AgentJwtApiProcessor.API_TYPE,
 		HostJwtApiProcessor.API_TYPE,
 		AgentHostJwtApiProcessor.API_TYPE
-	});
+	);
 	
 	private static final String USERID = "1234567890";
 	private static final String USERNAME = "username";
@@ -52,36 +51,20 @@ class AccessServiceImpl implements AccessService, BeanConfigure<AccessService> {
 	
 	private static final String REDIS_PREFIX = "ACCESS-";
 	
-	private WebFluxApiService apiService;
-	
 	private final DataMapper dataMapper;
+	private final WebFluxApiService apiService;
 	private final RedisTemplate<String, byte[]> redisTemplate;
 	
 	@Autowired
 	AccessServiceImpl(
 		DataMapper dataMapper,
+		WebFluxApiService apiService,
 		@Qualifier(AppConstants.Bean.Redis.ACCESS)
 		RedisTemplate<String, byte[]> redisTemplate
 	) {
 		this.dataMapper = dataMapper;
+		this.apiService = apiService;
 		this.redisTemplate = redisTemplate;
-	}
-	
-	@Override
-	public Callable<AccessService> onConfigureBean(ApplicationContext applicationContext) {
-		apiService = applicationContext.getBean(WebFluxApiService.class);
-		AccessServiceImpl self = this;
-		return new Callable<AccessService>() {
-			@Override
-			public AccessService call() throws Exception {
-				return self;
-			}
-		};
-	}
-
-	@Override
-	public boolean isBeanConfigured() {
-		return true;
 	}
 
 	@Override
@@ -96,7 +79,7 @@ class AccessServiceImpl implements AccessService, BeanConfigure<AccessService> {
 		Assert.isTrue(USERNAME.equals(username) && PASSWORD.equals(password), "Invalid user");
 		ApiRequest apiRequest = apiService.getApiRequest(httpRequest, true);
 		ApiAccess apiAccess = new ApiAccess()
-		.setValidUntil(TimeUtil.currentEpochMillis() + API_ACCESS_EXPIRY)
+		.setValidUntil(TimeValue.of(TimeUnit.MILLISECONDS, TimeUtil.currentEpochMillis() + API_ACCESS_EXPIRY))
 		.setApiUser(new ApiUser()
 			.setId(USERID)
 			.setUsername(USERNAME)
@@ -128,15 +111,31 @@ class AccessServiceImpl implements AccessService, BeanConfigure<AccessService> {
 	}
 
 	@Override
-	public ApiAccess info(ServerHttpRequest httpRequest, ApiParameter apiParameter) {
+	public ApiAccess info(
+		ServerHttpRequest httpRequest,
+		ApiParameter apiParameter
+	) {
 		String apiKey = apiParameter != null ? apiParameter.getApiKey() : null;
-		if (apiKey == null && httpRequest != null) {
+		if (apiKey == null) {
 			ApiRequest apiRequest = apiService.getApiRequest(httpRequest, false);
 			apiKey = apiService.getApiKey(apiRequest);
 		}
 		ValueOperations<String, byte[]> valops = redisTemplate.opsForValue();
 		byte[] values = valops.get(REDIS_PREFIX + apiKey);
 		return values != null ? dataMapper.read(values, ApiAccess.class) : null;
-	}	
+	}
+	
+	@Override
+	public String token(
+		ServerHttpRequest httpRequest
+	) {
+		ApiHeader apiHeader = apiService.getApiHeader();
+		ApiRequest apiRequest = apiService.getApiRequest(httpRequest, false);
+		String from = apiRequest.getHeader(apiHeader.getFromHeader());
+		Assert.hasLength(from, "Header " + apiHeader.getFromHeader() + " is required");
+		ApiSource apiSource = apiService.getApiSource(from);
+		Assert.notNull(apiSource, "ApiSource is not found");
+		return apiService.getApiTokenService().createConsumerToken(apiHeader, apiSource, apiRequest);
+	}
 
 }

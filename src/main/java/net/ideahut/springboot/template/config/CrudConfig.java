@@ -15,13 +15,14 @@ import net.ideahut.springboot.entity.TrxManagerInfo;
 import net.ideahut.springboot.mapper.DataMapper;
 import net.ideahut.springboot.template.Application;
 import net.ideahut.springboot.template.support.CrudSupport;
-import net.ideahut.springboot.util.FrameworkUtil;
+import net.ideahut.springboot.util.ErrorUtil;
+import net.ideahut.springboot.util.ObjectUtil;
 
 @Configuration
 class CrudConfig {
 	
 	@Bean
-	protected CrudHandler crudHandler(
+	CrudHandler crudHandler(
 		ApplicationContext applicationContext,
 		EntityTrxManager entityTrxManager,
 		DataMapper dataMapper,
@@ -42,12 +43,12 @@ class CrudConfig {
 	 * Contoh CrudResource berdasarkan nama class yang didefinisikan di CrudRequest
 	 */
 	@Bean
-	protected CrudResource crudResource(
+	CrudResource crudResource(
 		EntityTrxManager entityTrxManager
 	) {
 		return (manager, name) -> {
 			try {
-				Class<?> clazz = FrameworkUtil.classOf(Application.Package.APPLICATION + ".entity." + name);
+				Class<?> clazz = ObjectUtil.classOf(Application.Package.APPLICATION + ".entity." + name);
 				TrxManagerInfo trxManagerInfo = entityTrxManager.getDefaultTrxManagerInfo();
 				if (manager != null && !manager.isEmpty()) {
 					trxManagerInfo = entityTrxManager.getTrxManagerInfo(manager);
@@ -59,37 +60,36 @@ class CrudConfig {
 				properties.setUseNative(false);
 				return properties;
 			} catch (Exception e) {
-				throw FrameworkUtil.exception(e);
+				throw ErrorUtil.exception(e);
 			}
 		};
 	}
 	
 	/*
-	 * Contoh CrudResource yang diambil menggunakan ApiHandler
+	 * Contoh CrudResource yang diambil menggunakan ApiService
 	 * - Parameter manager yang didefinisikan di CrudRequest tidak akan digunakan, karena sudah ada di table
 	 * - Parameter name = crudCode
 	 */
 	/*
 	@Bean
-	protected CrudResource crudResource(
-		ApiHandler apiHandler
+	CrudResource crudResource(
+		WebFluxApiService apiService
 	) {
 		return (manager, name) -> {
-			ApiAccess access = RequestContext.currentContext().getAttribute(ApiAccess.CONTEXT);
-			CrudProperties properties = apiHandler.getCrudProperties(access.getRole(), name);
-			Assert.notNull(properties, "CrudProperties is not available (" + access.getRole() + "::" + name + ")");
+			ApiAccess apiAccess = RequestContext.currentContext().getAttribute(ApiAccess.CONTEXT);
+			CrudProperties properties = apiService.getApiCrudProperties(apiAccess, name);
+			Assert.notNull(properties, "CrudProperties is not found: " + name);
 			return properties;
 		};
 	}
 	*/
 	
 	
-	
 	/*
 	 * Contoh CrudPermission mengijinkan semua CrudRequest
 	 */
 	@Bean
-	protected CrudPermission crudPermission() {
+	CrudPermission crudPermission() {
 		return (action, request) -> true;
 	}
 	
@@ -99,7 +99,7 @@ class CrudConfig {
 	 */
 	/*
 	@Bean
-	protected CrudPermission crudPermission() {
+	CrudPermission crudPermission() {
 		return (action, request) -> {
 			CrudProperties properties = request.getProperties();
 			Set<CrudAction> actions = properties.getActions();
