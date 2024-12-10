@@ -10,9 +10,8 @@ import org.springframework.context.annotation.Configuration;
 
 import lombok.Getter;
 import lombok.Setter;
-import net.ideahut.springboot.admin.AdminProperties;
+import net.ideahut.springboot.api.ApiService;
 import net.ideahut.springboot.api.ApiTokenServiceImpl;
-import net.ideahut.springboot.api.WebFluxApiServiceImpl;
 import net.ideahut.springboot.audit.DatabaseAuditProperties;
 import net.ideahut.springboot.cache.CacheGroupProperties;
 import net.ideahut.springboot.entity.DatabaseProperties;
@@ -31,14 +30,33 @@ import net.ideahut.springboot.task.TaskProperties;
 @Getter
 public class AppProperties {
 	
+	// Tunggu semua bean selesai saat reconfigure (service status menjadi ready)
 	private Boolean waitAllBeanConfigured;
+	
+	// Log semua error yang terjadi
 	private Boolean loggingError;
+	
+	// Start scheduler pada saat startup
 	private Boolean autoStartScheduler;
+	
+	// Direktori file message berdasarkan bahasa
 	private String messagePath;
+	
+	// Lokasi file report (jrxml / jasper)
 	private String reportPath;
+	
+	// File konfigurasi kafka
+	private String kafkaConfigurationFile;
+	
+	// Parameter untuk menghandle anotasi @ForeignKeyEntity
+	// Ini solusi jika terjadi error saat membuat native image dimana entity memiliki @ManyToOne & @OneToMany
+	// tapi package-nya berbeda dengan package project (error ByteCodeProvider saat runtime)
 	private EntityForeignKeyParam foreignKey;
 	
+	// Daftar header CORS di setiap request
 	private Map<String, String> cors = new HashMap<>();
+	
+	// Daftar class yang akan diignore jika terjadi error
 	private List<Class<?>> ignoredHandlerClasses = new ArrayList<>();
 	
 	private MailProperties mail = new MailProperties();
@@ -50,7 +68,9 @@ public class AppProperties {
 	//private TrxManager trxManager = new TrxManager()
 	private Admin admin = new Admin();
 	private Api api = new Api();
+	private Crud crud = new Crud();
 	private TaskProperties webAsync = new TaskProperties();
+	private Handler handler = new Handler();
 	
 	
 	@Setter
@@ -62,13 +82,15 @@ public class AppProperties {
 	@Setter
 	@Getter
 	public static class Audit extends DatabaseProperties {
+		private Boolean isSingleAudit;
+		private Boolean rejectNonAuditEntity;
 		private DatabaseAuditProperties properties = new DatabaseAuditProperties();
 	}
 	
 	@Setter
 	@Getter
 	public static class Redis {
-		private RedisProperties common 	= new RedisProperties();
+		private RedisProperties.Connection common 	= new RedisProperties.Connection();
 	}
 	
 	@Setter
@@ -80,9 +102,14 @@ public class AppProperties {
 	
 	@Setter
 	@Getter
-	public static class Admin extends AdminProperties {
-		private String configFile;
+	public static class Admin {
+		private String configurationFile;
 		private String credentialFile;
+		private String apiPath;
+		private String webPath;
+		private String webLocation;
+		private Boolean webEnabled;
+		private Boolean useBasicAuth;
 	}
 	
 	@Setter
@@ -90,6 +117,13 @@ public class AppProperties {
 	public static class Grid {
 		private String location;
 		private String definition;
+	}
+	
+	@Setter
+	@Getter
+	public static class Handler {
+		private Boolean enableReport;
+		private Boolean enableKafka;
 	}
 	
 	@Setter
@@ -105,7 +139,7 @@ public class AppProperties {
 		private ApiTokenServiceImpl.Consumer consumer = new ApiTokenServiceImpl.Consumer();
 		// Parameter untuk membuat Jwt Token
 		private ApiTokenServiceImpl.JwtProcessor jwtProcessor = new ApiTokenServiceImpl.JwtProcessor();
-		private WebFluxApiServiceImpl.RedisExpiry redisExpiry = new WebFluxApiServiceImpl.RedisExpiry();
+		private ApiService.RedisExpiry redisExpiry = new ApiService.RedisExpiry();
 		
 		@Setter
 		@Getter
@@ -118,6 +152,16 @@ public class AppProperties {
 			// dari semua konfigurasi api di database
 			private Boolean sync;
 		}
+	}
+	
+	@Setter
+	@Getter
+	public static class Crud {
+		// Resource akan diambil menggunakan fungsi ApiService
+		private Boolean enableApiService;
+		
+		// Permission akan dicek atau tidak
+		private Boolean enablePermission;
 	}
 	
 }

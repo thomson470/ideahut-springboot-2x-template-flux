@@ -46,8 +46,8 @@ public class Information extends EntityAudit {
 	private String description;
 	
 	@Lob
-	//@Type(type = "org.hibernate.type.BinaryType")
-	//@Type(type = "org.hibernate.type.TextType")
+	//@Type(type = DataType.Name.Binary)
+	//@Type(type = DataType.Name.Text)
 	@Column(name = "content")
 	private String content;
 	

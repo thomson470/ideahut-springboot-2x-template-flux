@@ -1,8 +1,8 @@
 package net.ideahut.springboot.template.controller;
 
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.ComponentScan;
-import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -16,12 +16,12 @@ import net.ideahut.springboot.audit.AuditRequest;
 import net.ideahut.springboot.entity.EntityTrxManager;
 import net.ideahut.springboot.entity.TrxManagerInfo;
 import net.ideahut.springboot.exception.ResultRuntimeException;
+import net.ideahut.springboot.helper.FrameworkHelper;
+import net.ideahut.springboot.helper.ObjectHelper;
+import net.ideahut.springboot.helper.WebFluxHelper;
 import net.ideahut.springboot.object.Page;
 import net.ideahut.springboot.object.Result;
 import net.ideahut.springboot.template.Application;
-import net.ideahut.springboot.util.FrameworkUtil;
-import net.ideahut.springboot.util.ObjectUtil;
-import net.ideahut.springboot.util.WebFluxUtil;
 import reactor.core.publisher.Mono;
 
 /*
@@ -48,23 +48,24 @@ class AuditController {
 	
 	@PostMapping(value = "/list")
 	Mono<Result> list(
-		ServerHttpRequest request
+		ServerHttpRequest httpRequest
 	) throws Exception {
-		return DataBufferUtils.join(request.getBody()).flatMap(dataBuffer -> {
-			byte[] data = WebFluxUtil.getDataBufferAsBytes(dataBuffer);
-			AuditRequest auditRequest = auditHandler.getRequest(data);
-			TrxManagerInfo trxManagerInfo = FrameworkUtil.getTrxManagerInfo(entityTrxManager, auditRequest.getManager());
+		return WebFluxHelper
+		.onRequestBody(httpRequest)
+		.flatMap(bytes -> {
+			AuditRequest auditRequest = auditHandler.getRequest(bytes);
+			TrxManagerInfo trxManagerInfo = FrameworkHelper.getTrxManagerInfo(entityTrxManager, auditRequest.getManager());
 			if (trxManagerInfo == null) {
 				throw new ResultRuntimeException(Result.error("AUDIT-01", "Unknown manager: " + auditRequest.getManager()));
 			}
 			String entity = auditRequest.getEntity();
 			if (entity != null && !entity.isEmpty() && auditRequest.getClassOfEntity() == null) {
 				try {
-					Class<?> classOfEntity = ObjectUtil.classOf(entity);
+					Class<?> classOfEntity = ObjectHelper.classOf(entity);
 					auditRequest.setClassOfEntity(classOfEntity);
 				} catch(Exception e1) {
 					try {
-						Class<?> type = ObjectUtil.classOf(Application.Package.APPLICATION + ".entity." + entity);
+						Class<?> type = ObjectHelper.classOf(Application.Package.APPLICATION + ".entity." + entity);
 						auditRequest.setClassOfEntity(type);	
 					} catch (Exception e2) {
 						throw new ResultRuntimeException(Result.error("AUDIT-02", "Entity is not found, for: " + entity));
@@ -74,7 +75,6 @@ class AuditController {
 			Page page = auditHandler.getList(auditRequest);
 			return Mono.just(Result.success(page));
 		});
-		
 	}
 	
 	

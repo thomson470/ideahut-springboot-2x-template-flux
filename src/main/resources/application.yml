@@ -63,6 +63,7 @@ app:
    autoStartScheduler: false
    messagePath: "file:{user.dir}/extras/message/"
    reportPath: "file:{user.dir}/extras/report/"
+   kafkaConfigurationFile: "file:{user.dir}/extras/kafka/kafka1.yaml"
    
    #
    # CORS Http Header
@@ -77,7 +78,6 @@ app:
                      
    ignored-handler-classes:
       - org.springframework.boot.autoconfigure.web.servlet.error.BasicErrorController
-      - org.springframework.web.servlet.NoHandlerFoundException
    
    #
    # Model / Entity yang punya annotation @ForeignKeyEntity akan dieksekusi
@@ -118,12 +118,11 @@ app:
 
    redis:
       common:
-         type: 1
-         testOnStartup: true
+         type: 0
          standalone:
-            host: ""
-            port: ""
-            password: ""
+            host: "<HOST>"
+            port: "<PORT>"
+            password: "<PASSWORD>"
             database: 0
             
    cache:
@@ -144,8 +143,8 @@ app:
    mail:
       host: smtp.gmail.com
       port: 587
-      username: ""
-      password: ""
+      username: "<USERNAME>"
+      password: "<PASSWORD>"
       properties:
          "mail.smtp.host": "smtp.gmail.com"
          "mail.smtp.ssl.trust": "smtp.gmail.com"
@@ -162,11 +161,16 @@ app:
       #definition: "file:{user.dir}/extras/grid/grid.def"
       
    admin:
-      configFile: "file:{user.dir}/extras/admin/config.json"
-      credentialFile: "file:{user.dir}/extras/admin/credential-bcrypt.json"
-      #credentialFile: "file:{user.dir}/extras/admin/credential-sha256.json"
+      configurationFile: "file:{user.dir}/extras/admin/configuration.yaml"
+      credentialFile: "file:{user.dir}/extras/admin/credential.yaml"
+      apiPath: "/_/api"
+      webPath: "/_/web"
+      webLocation: "file:{user.dir}/extras/admin/web/"
+      webEnabled: true
+      useBasicAuth: false
       
    api:
+      name: "TEMPLATE-FLUX"
       enable:
          consumer: true
          crud: true
@@ -199,6 +203,14 @@ app:
       threadNamePrefix: "WEB-ASYNC"
       corePoolSize: 10
       maxPoolSize: 100
+   
+   crud:
+      enableApiService: true
+      enablePermission: true
+      
+   handler:
+      enableReport: true
+      enableKafka: true
 
 other:   
    trxManager:
