@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import net.ideahut.springboot.annotation.Public;
 import net.ideahut.springboot.helper.FrameworkHelper;
 import net.ideahut.springboot.helper.StringHelper;
 import net.ideahut.springboot.report.ReportHandler;
@@ -36,6 +37,7 @@ import reactor.core.publisher.Mono;
 /*
  * Contoh penggunaan ReportHandler
  */
+@Public
 @ComponentScan
 @RestController
 @RequestMapping("/report")
@@ -106,8 +108,6 @@ class ReportController implements InitializingBean {
 			}
 		});
 		return ResponseEntity.ok()
-        //.header(HttpHeaders.CONTENT_DISPOSITION,  "attachment; filename=" + System.nanoTime() + "." + type.name().toLowerCase())
-        //.header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_OCTET_STREAM_VALUE)
 		.contentType(MediaType.valueOf(type.getContentType()))
         .body(mono.flatMap(x -> {
         	Resource resource = new InputStreamResource(x);
