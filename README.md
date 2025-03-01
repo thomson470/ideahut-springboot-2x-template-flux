@@ -10,3 +10,7 @@
 <div align="left">
    <img src="./screenshot.jpg" alt="Admin" title="Admin" width="800" />
 </div>
+
+##
+
+### [Index](https://github.com/thomson470/Ideahut-Template)
